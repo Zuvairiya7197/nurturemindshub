@@ -9,8 +9,6 @@ A modern, conversion-focused edtech website built with Next.js App Router for pa
 - Tailwind CSS
 - Shadcn-style reusable UI components
 - Framer Motion animations
-- Prisma + PostgreSQL
-- NextAuth (Credentials)
 
 ## Implemented Pages
 
@@ -36,12 +34,9 @@ A modern, conversion-focused edtech website built with Next.js App Router for pa
 ## Core Functional Features
 
 - Course listing + dynamic course detail pages
-- Booking form with server action validation and persistence
-- Parent account signup (demo mode) + login
-- Role-based session handling (`ADMIN`, `PARENT`, `TEACHER`)
-- Parent dashboard for bookings, progress, worksheets, recordings
-- Admin panel with users, courses, and bookings overview
-- Teacher onboarding and contact forms with server-action feedback
+- Booking, teacher onboarding, contact, signup, and login forms with frontend validation
+- Parent dashboard preview for bookings, progress, worksheets, recordings
+- Admin panel preview with users, courses, and bookings overview
 
 ## Setup
 
@@ -54,19 +49,7 @@ npm install
 ```bash
 cp .env.example .env
 ```
-
-3. Generate Prisma client and push schema
-```bash
-npx prisma generate
-npx prisma db push
-```
-
-4. Seed demo data
-```bash
-npm run prisma:seed
-```
-
-5. Run app
+3. Run app
 ```bash
 npm run dev
 ```
@@ -75,11 +58,7 @@ Open `http://localhost:3000`.
 
 ## Demo Auth Notes
 
-After seeding, use:
-- `parent@example.com`
-- `admin@nurtureminds.com`
-
-In this local demo setup, credentials login accepts any password for existing seeded emails.
+Auth is frontend-only in demo mode. Login/signup flows are UI simulations with no backend persistence.
 
 ## Build Status
 

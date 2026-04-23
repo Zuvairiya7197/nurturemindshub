@@ -1,22 +1,50 @@
 'use client';
 
-import { useFormState } from 'react-dom';
-import { bookTrialAction, type ActionResult } from '@/app/actions';
+import { useState } from 'react';
 import { Input } from '@/components/ui/input';
-import { SubmitButton, FormMessage } from '@/components/ui/form-state';
+import { Button } from '@/components/ui/button';
+import { FormMessage } from '@/components/ui/form-state';
 
 type BookingCourse = {
   id: string;
   name: string;
 };
 
-const initialState: ActionResult = { success: false, message: '' };
-
 export function BookingForm({ courses, defaultCourseId }: { courses: BookingCourse[]; defaultCourseId?: string }) {
-  const [state, formAction] = useFormState(bookTrialAction, initialState);
+  const [state, setState] = useState({ success: false, message: '' });
+  const [submitting, setSubmitting] = useState(false);
+
+  function onSubmit(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    setSubmitting(true);
+
+    const formData = new FormData(event.currentTarget);
+    const parentName = String(formData.get('parentName') ?? '').trim();
+    const childName = String(formData.get('childName') ?? '').trim();
+    const age = Number(String(formData.get('age') ?? '').trim());
+    const phone = String(formData.get('phone') ?? '').trim();
+    const email = String(formData.get('email') ?? '').trim().toLowerCase();
+    const courseId = String(formData.get('courseId') ?? '').trim();
+
+    if (!parentName || !childName || !phone || !email || !courseId || !Number.isFinite(age)) {
+      setState({ success: false, message: 'Please fill all required booking fields.' });
+      setSubmitting(false);
+      return;
+    }
+
+    if (age < 4 || age > 16) {
+      setState({ success: false, message: 'Please enter a valid age between 4 and 16.' });
+      setSubmitting(false);
+      return;
+    }
+
+    setState({ success: true, message: 'Trial request submitted. We will contact you shortly.' });
+    event.currentTarget.reset();
+    setSubmitting(false);
+  }
 
   return (
-    <form action={formAction} className="space-y-5 rounded-[2rem] border border-slate-200 bg-white p-7 shadow-soft sm:p-8">
+    <form onSubmit={onSubmit} className="space-y-5 rounded-[2rem] border border-slate-200 bg-white p-7 shadow-soft sm:p-8">
       <div className="grid gap-4 sm:grid-cols-2">
         <label className="space-y-2 text-sm font-medium text-slate-700">
           Parent Name
@@ -61,9 +89,9 @@ export function BookingForm({ courses, defaultCourseId }: { courses: BookingCour
       </label>
 
       <FormMessage message={state.message} success={state.success} />
-      <SubmitButton className="w-full" pendingLabel="Submitting...">
-        Book Free Trial
-      </SubmitButton>
+      <Button type="submit" className="w-full" disabled={submitting}>
+        {submitting ? 'Submitting...' : 'Book Free Trial'}
+      </Button>
     </form>
   );
 }

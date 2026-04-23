@@ -1,8 +1,14 @@
-import { Role, type Course } from '@prisma/client';
-import { prisma } from '@/lib/prisma';
-
-export type CourseView = Pick<Course, 'id' | 'name' | 'slug' | 'summary' | 'audience' | 'duration' | 'lessons' | 'image' | 'categories'> & {
+export type CourseView = {
+  id: string;
+  name: string;
+  slug: string;
+  summary: string;
   description: string;
+  audience: string;
+  duration: string;
+  lessons: number;
+  image: string;
+  categories: string[];
   outcomes: string[];
 };
 
@@ -90,128 +96,81 @@ export const testimonials: Testimonial[] = [
 ];
 
 export async function getCourses() {
-  try {
-    const courses = await prisma.course.findMany({ orderBy: { createdAt: 'asc' } });
-
-    if (courses.length > 0) {
-      return courses.map((course) => ({
-        ...course,
-        description: 'Live structured sessions with measurable learning outcomes and parent updates after every class.',
-        outcomes: ['Strong conceptual learning', 'Practice worksheet completion', 'Visible confidence improvement']
-      })) as CourseView[];
-    }
-  } catch {
-    return fallbackCourses;
-  }
-
   return fallbackCourses;
 }
 
 export async function getCourseBySlug(slug: string) {
-  const courses = await getCourses();
-  return courses.find((course) => course.slug === slug) ?? null;
+  return fallbackCourses.find((course) => course.slug === slug) ?? null;
 }
 
 export async function getAdminMetrics() {
-  try {
-    const [users, courses, bookings] = await Promise.all([
-      prisma.user.count(),
-      prisma.course.count(),
-      prisma.booking.count()
-    ]);
-
-    return { users, courses, bookings };
-  } catch {
-    return { users: 120, courses: 4, bookings: 52 };
-  }
+  return { users: 120, courses: 4, bookings: 52 };
 }
 
-export async function getDashboardData(email?: string | null) {
-  if (!email) {
-    return {
-      bookings: [],
-      progress: [],
-      worksheets: [],
-      recordings: []
-    };
-  }
-
-  try {
-    const bookings = await prisma.booking.findMany({
-      where: { email },
-      include: { course: true },
-      orderBy: { createdAt: 'desc' },
-      take: 6
-    });
-
-    return {
-      bookings,
-      progress: [
-        {
-          id: 'progress-1',
-          course: { name: 'English Confidence Builder' },
-          completion: 72
-        },
-        {
-          id: 'progress-2',
-          course: { name: 'Math Mastery Program' },
-          completion: 58
-        }
-      ],
-      worksheets: [
-        { id: 'w1', title: 'Reading Worksheet - Level 1', url: '#' },
-        { id: 'w2', title: 'Math Practice Sheet - Week 2', url: '#' }
-      ],
-      recordings: [
-        { id: 'r1', title: 'English Live Class Recording', url: '#' },
-        { id: 'r2', title: 'Math Foundation Class Recording', url: '#' }
-      ]
-    };
-  } catch {
-    return {
-      bookings: [],
-      progress: [
-        {
-          id: 'progress-1',
-          course: { name: 'English Confidence Builder' },
-          completion: 72
-        }
-      ],
-      worksheets: [{ id: 'w1', title: 'Reading Worksheet - Level 1', url: '#' }],
-      recordings: [{ id: 'r1', title: 'Week 1 Live Class Recording', url: '#' }]
-    };
-  }
+export async function getDashboardData() {
+  return {
+    bookings: [
+      {
+        id: 'booking-1',
+        childName: 'Aarav',
+        status: 'PENDING',
+        course: { name: 'English Confidence Builder' }
+      },
+      {
+        id: 'booking-2',
+        childName: 'Maya',
+        status: 'CONFIRMED',
+        course: { name: 'Math Mastery Program' }
+      }
+    ],
+    progress: [
+      {
+        id: 'progress-1',
+        course: { name: 'English Confidence Builder' },
+        completion: 72
+      },
+      {
+        id: 'progress-2',
+        course: { name: 'Math Mastery Program' },
+        completion: 58
+      }
+    ],
+    worksheets: [
+      { id: 'w1', title: 'Reading Worksheet - Level 1', url: '#' },
+      { id: 'w2', title: 'Math Practice Sheet - Week 2', url: '#' }
+    ],
+    recordings: [
+      { id: 'r1', title: 'English Live Class Recording', url: '#' },
+      { id: 'r2', title: 'Math Foundation Class Recording', url: '#' }
+    ]
+  };
 }
 
 export async function getAdminTables() {
-  try {
-    const [users, courses, bookings] = await Promise.all([
-      prisma.user.findMany({ orderBy: { createdAt: 'desc' }, take: 8 }),
-      prisma.course.findMany({ orderBy: { createdAt: 'desc' }, take: 8 }),
-      prisma.booking.findMany({
-        include: { course: true },
-        orderBy: { createdAt: 'desc' },
-        take: 8
-      })
-    ]);
-
-    return { users, courses, bookings };
-  } catch {
-    return {
-      users: [
-        {
-          id: 'u1',
-          name: 'Admin User',
-          email: 'admin@nurtureminds.com',
-          emailVerified: null,
-          image: null,
-          role: Role.ADMIN,
-          createdAt: new Date(),
-          updatedAt: new Date()
-        }
-      ],
-      courses: fallbackCourses,
-      bookings: []
-    };
-  }
+  return {
+    users: [
+      {
+        id: 'u1',
+        name: 'Admin User',
+        email: 'admin@nurtureminds.com',
+        role: 'ADMIN'
+      },
+      {
+        id: 'u2',
+        name: 'Parent User',
+        email: 'parent@example.com',
+        role: 'PARENT'
+      }
+    ],
+    courses: fallbackCourses,
+    bookings: [
+      {
+        id: 'b1',
+        parentName: 'Priya Sharma',
+        childName: 'Vivaan',
+        status: 'PENDING',
+        course: { name: 'Communication Confidence' }
+      }
+    ]
+  };
 }

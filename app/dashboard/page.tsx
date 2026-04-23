@@ -1,7 +1,5 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import { redirect } from 'next/navigation';
-import { getAuthSession } from '@/lib/auth';
 import { getDashboardData } from '@/lib/data';
 import { SectionHeading } from '@/components/ui/section-heading';
 import { Card, CardContent } from '@/components/ui/card';
@@ -9,17 +7,11 @@ import { Button } from '@/components/ui/button';
 
 export const metadata: Metadata = {
   title: 'Dashboard',
-  description: 'Parent dashboard to view booked classes, track progress, and access resources.'
+  description: 'Parent dashboard preview to view classes, progress, and learning resources.'
 };
 
 export default async function DashboardPage() {
-  const session = await getAuthSession();
-
-  if (!session?.user?.email) {
-    redirect('/auth');
-  }
-
-  const dashboard = await getDashboardData(session.user.email);
+  const dashboard = await getDashboardData();
 
   return (
     <main className="px-4 py-14 sm:px-6 lg:px-8">
@@ -128,11 +120,9 @@ export default async function DashboardPage() {
           </Card>
         </div>
 
-        {session.user.role === 'ADMIN' ? (
-          <Link href="/admin">
-            <Button variant="outline">Open Admin Panel</Button>
-          </Link>
-        ) : null}
+        <Link href="/admin">
+          <Button variant="outline">Open Admin Panel</Button>
+        </Link>
       </div>
     </main>
   );

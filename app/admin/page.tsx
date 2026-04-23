@@ -1,22 +1,14 @@
 import type { Metadata } from 'next';
-import { redirect } from 'next/navigation';
-import { getAuthSession } from '@/lib/auth';
 import { getAdminMetrics, getAdminTables } from '@/lib/data';
 import { SectionHeading } from '@/components/ui/section-heading';
 import { Card, CardContent } from '@/components/ui/card';
 
 export const metadata: Metadata = {
   title: 'Admin Panel',
-  description: 'Admin dashboard to manage users, courses, and bookings.'
+  description: 'Admin dashboard preview with demo users, courses, and bookings.'
 };
 
 export default async function AdminPage() {
-  const session = await getAuthSession();
-
-  if (!session?.user || session.user.role !== 'ADMIN') {
-    redirect('/auth');
-  }
-
   const [metrics, tables] = await Promise.all([getAdminMetrics(), getAdminTables()]);
 
   return (

@@ -1,17 +1,42 @@
 'use client';
 
-import { useFormState } from 'react-dom';
-import { signupAction, type ActionResult } from '@/app/actions';
+import { useState } from 'react';
 import { Input } from '@/components/ui/input';
-import { SubmitButton, FormMessage } from '@/components/ui/form-state';
-
-const initialState: ActionResult = { success: false, message: '' };
+import { Button } from '@/components/ui/button';
+import { FormMessage } from '@/components/ui/form-state';
 
 export function SignupForm() {
-  const [state, formAction] = useFormState(signupAction, initialState);
+  const [state, setState] = useState({ success: false, message: '' });
+  const [submitting, setSubmitting] = useState(false);
+
+  function onSubmit(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    setSubmitting(true);
+
+    const formData = new FormData(event.currentTarget);
+    const name = String(formData.get('name') ?? '').trim();
+    const email = String(formData.get('email') ?? '').trim().toLowerCase();
+    const password = String(formData.get('password') ?? '').trim();
+
+    if (!name || !email || !password) {
+      setState({ success: false, message: 'Please provide name, email, and password.' });
+      setSubmitting(false);
+      return;
+    }
+
+    if (password.length < 8) {
+      setState({ success: false, message: 'Password must be at least 8 characters long.' });
+      setSubmitting(false);
+      return;
+    }
+
+    setState({ success: true, message: 'Signup successful. You can now use the demo dashboard.' });
+    event.currentTarget.reset();
+    setSubmitting(false);
+  }
 
   return (
-    <form action={formAction} className="space-y-4">
+    <form onSubmit={onSubmit} className="space-y-4">
       <label className="space-y-2 text-sm font-medium text-slate-700">
         Name
         <Input name="name" placeholder="Parent name" required />
@@ -25,9 +50,9 @@ export function SignupForm() {
         <Input name="password" type="password" placeholder="Minimum 8 characters" required />
       </label>
       <FormMessage message={state.message} success={state.success} />
-      <SubmitButton className="w-full" pendingLabel="Creating account...">
-        Create Parent Account
-      </SubmitButton>
+      <Button type="submit" className="w-full" disabled={submitting}>
+        {submitting ? 'Creating account...' : 'Create Parent Account'}
+      </Button>
     </form>
   );
 }

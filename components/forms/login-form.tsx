@@ -1,7 +1,6 @@
 'use client';
 
 import { useState } from 'react';
-import { signIn } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -20,20 +19,17 @@ export function LoginForm() {
     const email = String(formData.get('email') ?? '');
     const password = String(formData.get('password') ?? '');
 
-    const result = await signIn('credentials', {
-      email,
-      password,
-      redirect: false
-    });
-
-    if (result?.error) {
+    if (!email || !password) {
       setError('Invalid credentials. Please try again.');
       setLoading(false);
       return;
     }
 
-    router.push('/dashboard');
-    router.refresh();
+    setTimeout(() => {
+      router.push('/dashboard');
+      router.refresh();
+      setLoading(false);
+    }, 250);
   }
 
   return (

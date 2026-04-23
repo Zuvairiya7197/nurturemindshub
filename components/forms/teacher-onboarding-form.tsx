@@ -1,17 +1,38 @@
 'use client';
 
-import { useFormState } from 'react-dom';
-import { teacherOnboardingAction, type ActionResult } from '@/app/actions';
+import { useState } from 'react';
 import { Input } from '@/components/ui/input';
-import { SubmitButton, FormMessage } from '@/components/ui/form-state';
-
-const initialState: ActionResult = { success: false, message: '' };
+import { Button } from '@/components/ui/button';
+import { FormMessage } from '@/components/ui/form-state';
 
 export function TeacherOnboardingForm() {
-  const [state, formAction] = useFormState(teacherOnboardingAction, initialState);
+  const [state, setState] = useState({ success: false, message: '' });
+  const [submitting, setSubmitting] = useState(false);
+
+  function onSubmit(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    setSubmitting(true);
+
+    const formData = new FormData(event.currentTarget);
+    const name = String(formData.get('name') ?? '').trim();
+    const email = String(formData.get('email') ?? '').trim().toLowerCase();
+    const experience = String(formData.get('experience') ?? '').trim();
+    const subjects = String(formData.get('subjects') ?? '').trim();
+    const availability = String(formData.get('availability') ?? '').trim();
+
+    if (!name || !email || !experience || !subjects || !availability) {
+      setState({ success: false, message: 'Please complete every onboarding field.' });
+      setSubmitting(false);
+      return;
+    }
+
+    setState({ success: true, message: 'Application submitted. Our academic team will reach out soon.' });
+    event.currentTarget.reset();
+    setSubmitting(false);
+  }
 
   return (
-    <form action={formAction} className="space-y-5 rounded-[2rem] bg-white p-8 shadow-soft">
+    <form onSubmit={onSubmit} className="space-y-5 rounded-[2rem] bg-white p-8 shadow-soft">
       <div className="grid gap-4 sm:grid-cols-2">
         <label className="space-y-2 text-sm font-medium text-slate-700">
           Name
@@ -45,9 +66,9 @@ export function TeacherOnboardingForm() {
       </label>
 
       <FormMessage message={state.message} success={state.success} />
-      <SubmitButton className="w-full" pendingLabel="Submitting...">
-        Submit Application
-      </SubmitButton>
+      <Button type="submit" className="w-full" disabled={submitting}>
+        {submitting ? 'Submitting...' : 'Submit Application'}
+      </Button>
     </form>
   );
 }
